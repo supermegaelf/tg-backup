@@ -1,25 +1,26 @@
 #!/bin/bash
 
-read -p "Enter MySQL username: " MYSQL_USER
+read -p "MySQL username (default is marzban, press Enter to use default): " MYSQL_USER
+MYSQL_USER=${MYSQL_USER:-marzban}
 if [ -z "$MYSQL_USER" ]; then
     echo "Error: MySQL username cannot be empty"
     exit 1
 fi
 
-read -sp "Enter MySQL password: " MYSQL_PASSWORD
+read -sp "MySQL password: " MYSQL_PASSWORD
 echo
 if [ -z "$MYSQL_PASSWORD" ]; then
     echo "Error: MySQL password cannot be empty"
     exit 1
 fi
 
-read -p "Enter Telegram Bot Token: " TG_BOT_TOKEN
+read -p "Telegram Bot Token: " TG_BOT_TOKEN
 if [[ ! "$TG_BOT_TOKEN" =~ ^bot[0-9]+:[A-Za-z0-9_-]+$ ]]; then
     echo "Error: Invalid Telegram Bot Token format"
     exit 1
 fi
 
-read -p "Enter Telegram Chat ID: " TG_CHAT_ID
+read -p "Telegram Chat ID: " TG_CHAT_ID
 if [[ ! "$TG_CHAT_ID" =~ ^-?[0-9]+$ ]]; then
     echo "Error: Invalid Telegram Chat ID format"
     exit 1
