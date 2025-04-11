@@ -130,7 +130,7 @@ tar -rf "$TEMP_DIR/backup-marzban.tar" -C / /var/lib/marzban/mysql/db-backup/*
 gzip "$TEMP_DIR/backup-marzban.tar"
 
 curl -F chat_id="$TG_CHAT_ID" \
-     -F caption=$'\n\n<code>'"$PUBLIC_IP"'</code>\n' \
+     -F caption=$'\n<code>'"$PUBLIC_IP"'</code>' \
      -F parse_mode="HTML" \
      -F document=@"$BACKUP_FILE" \
      https://api.telegram.org/bot$TG_BOT_TOKEN/sendDocument \
