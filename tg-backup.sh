@@ -15,7 +15,7 @@ if [ -z "$MYSQL_PASSWORD" ]; then
 fi
 
 read -p "Telegram Bot Token: " TG_BOT_TOKEN
-if [[ ! "$TG_BOT_TOKEN" =~ ^bot[0-9]+:[A-Za-z0-9_-]+$ ]]; then
+if [[ ! "$TG_BOT_TOKEN" =~ ^[0-9]+:[A-Za-z0-9_-]+$ ]]; then
     echo "Error: Invalid Telegram Bot Token format"
     exit 1
 fi
@@ -55,34 +55,4 @@ if [ $? -ne 0 ]; then
 fi
 
 for db in $databases_marzban; do
-    if [[ "$db" == "marzban" ]]; then
-        docker exec $MYSQL_CONTAINER_NAME mariadb-dump -h 127.0.0.1 --force --opt --user="$MYSQL_USER" --password="$MYSQL_PASSWORD" --databases $db > /var/lib/marzban/mysql/db-backup/$db.sql
-    fi
-done
-
-for db in $databases_shop; do
-    if [[ "$db" == "shop" ]]; then
-        docker exec marzban-shop-db-1 mariadb-dump -h 127.0.0.1 --force --opt --user="$MYSQL_USER" --password="$MYSQL_PASSWORD" --databases $db > /var/lib/marzban/mysql/db-backup/$db.sql
-    fi
-done
-
-tar --exclude='/var/lib/marzban/mysql/*' --exclude='/var/lib/marzban/logs/*' \
-    --exclude='/var/lib/marzban/access.log*' \
-    --exclude='/var/lib/marzban/error.log*' \
-    --exclude='/var/lib/marzban/xray-core/*' \
-    -cf "$TEMP_DIR/backup-marzban.tar" \
-    -C / \
-    /opt/marzban/.env \
-    /opt/marzban/ \
-    /var/lib/marzban/
-tar -rf "$TEMP_DIR/backup-marzban.tar" -C / /var/lib/marzban/mysql/db-backup/*
-gzip "$TEMP_DIR/backup-marzban.tar"
-
-curl -F chat_id="$TG_CHAT_ID" \
-     -F caption=$'Main\n\nMarzban and Shop backup\n<code>188.245.93.215</code>\nhttps://dash.wetset.xyz/QVFy58j4ZS/' \
-     -F parse_mode="HTML" \
-     -F document=@"$BACKUP_FILE" \
-     https://api.telegram.org/$TG_BOT_TOKEN/sendDocument \
-&& rm -rf /var/lib/marzban/mysql/db-backup/*
-
-rm -rf "$TEMP_DIR"
+    if [[ "$db" ==
