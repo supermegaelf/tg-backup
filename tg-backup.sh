@@ -1,26 +1,66 @@
 #!/bin/bash
 
-read -p "MySQL username (default is marzban, press Enter to use default): " MYSQL_USER
-MYSQL_USER=${MYSQL_USER:-marzban}
+# Variables (will be set on first run)
+MYSQL_USER=""
+MYSQL_PASSWORD=""
+TG_BOT_TOKEN=""
+TG_CHAT_ID=""
+
+# Check if variables are unset (first run)
+if [ -z "$MYSQL_USER" ] || [ -z "$MYSQL_PASSWORD" ] || [ -z "$TG_BOT_TOKEN" ] || [ -z "$TG_CHAT_ID" ]; then
+    read -p "MySQL username (default is marzban, press Enter to use default): " MYSQL_USER
+    MYSQL_USER=${MYSQL_USER:-marzban}
+    read -sp "MySQL password: " MYSQL_PASSWORD
+    echo
+    read -p "Telegram Bot Token: " TG_BOT_TOKEN
+    read -p "Telegram Chat ID: " TG_CHAT_ID
+
+    # Validate inputs
+    if [ -z "$MYSQL_USER" ]; then
+        echo "Error: MySQL username cannot be empty"
+        exit 1
+    fi
+    if [ -z "$MYSQL_PASSWORD" ]; then
+        echo "Error: MySQL password cannot be empty"
+        exit 1
+    fi
+    if [[ ! "$TG_BOT_TOKEN" =~ ^[0-9]+:[A-Za-z0-9_-]+$ ]]; then
+        echo "Error: Invalid Telegram Bot Token format"
+        exit 1
+    fi
+    if [[ ! "$TG_CHAT_ID" =~ ^-?[0-9]+$ ]]; then
+        echo "Error: Invalid Telegram Chat ID format"
+        exit 1
+    fi
+
+    # Rewrite script with provided variables
+    sed -i "s/MYSQL_USER=\"\"/MYSQL_USER=\"$MYSQL_USER\"/" "$0"
+    sed -i "s/MYSQL_PASSWORD=\"\"/MYSQL_PASSWORD=\"$MYSQL_PASSWORD\"/" "$0"
+    sed -i "s/TG_BOT_TOKEN=\"\"/TG_BOT_TOKEN=\"$TG_BOT_TOKEN\"/" "$0"
+    sed -i "s/TG_CHAT_ID=\"\"/TG_CHAT_ID=\"$TG_CHAT_ID\"/" "$0"
+
+    # Set up cron job (only if not already present)
+    if ! grep -q "/root/scripts/tg-backup.sh" /etc/crontab; then
+        echo "0 */1 * * * root /bin/bash /root/scripts/tg-backup.sh >/dev/null 2>&1" | tee -a /etc/crontab
+    fi
+fi
+
+# Validate variables (for all runs)
 if [ -z "$MYSQL_USER" ]; then
     echo "Error: MySQL username cannot be empty"
     exit 1
 fi
 
-read -sp "MySQL password: " MYSQL_PASSWORD
-echo
 if [ -z "$MYSQL_PASSWORD" ]; then
     echo "Error: MySQL password cannot be empty"
     exit 1
 fi
 
-read -p "Telegram Bot Token: " TG_BOT_TOKEN
 if [[ ! "$TG_BOT_TOKEN" =~ ^[0-9]+:[A-Za-z0-9_-]+$ ]]; then
     echo "Error: Invalid Telegram Bot Token format"
     exit 1
 fi
 
-read -p "Telegram Chat ID: " TG_CHAT_ID
 if [[ ! "$TG_CHAT_ID" =~ ^-?[0-9]+$ ]]; then
     echo "Error: Invalid Telegram Chat ID format"
     exit 1
@@ -33,6 +73,7 @@ if [ ! -d "$TEMP_DIR" ]; then
 fi
 BACKUP_FILE="$TEMP_DIR/backup-marzban.tar.gz"
 
+# Get public IP address
 PUBLIC_IP=$(curl -s ifconfig.me)
 if [ -z "$PUBLIC_IP" ]; then
     PUBLIC_IP="unknown"
