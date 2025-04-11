@@ -33,6 +33,11 @@ if [ ! -d "$TEMP_DIR" ]; then
 fi
 BACKUP_FILE="$TEMP_DIR/backup-marzban.tar.gz"
 
+PUBLIC_IP=$(curl -s ifconfig.me)
+if [ -z "$PUBLIC_IP" ]; then
+    PUBLIC_IP="unknown"
+fi
+
 MYSQL_CONTAINER_NAME="marzban-mariadb-1"
 if ! docker ps -q -f name="$MYSQL_CONTAINER_NAME" | grep -q .; then
     echo "Error: Container $MYSQL_CONTAINER_NAME is not running"
@@ -91,7 +96,7 @@ tar -rf "$TEMP_DIR/backup-marzban.tar" -C / /var/lib/marzban/mysql/db-backup/*
 gzip "$TEMP_DIR/backup-marzban.tar"
 
 curl -F chat_id="$TG_CHAT_ID" \
-     -F caption=$'Main\n\nMarzban and Shop backup\n<code>188.245.93.215</code>\nhttps://dash.wetset.xyz/QVFy58j4ZS/' \
+     -F caption=$'\n\n<code>'"$PUBLIC_IP"'</code>\n' \
      -F parse_mode="HTML" \
      -F document=@"$BACKUP_FILE" \
      https://api.telegram.org/bot$TG_BOT_TOKEN/sendDocument \
