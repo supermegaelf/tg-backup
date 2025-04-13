@@ -98,6 +98,8 @@ else
     echo "Warning: Container $SHOP_CONTAINER_NAME not found, skipping shop database dump"
 fi
 
+mkdir -p /var/lib/marzban/mysql/db-backup/
+
 for db in $databases_marzban; do
     if [[ "$db" == "marzban" ]]; then
         docker exec $MYSQL_CONTAINER_NAME mariadb-dump -h 127.0.0.1 --force --opt --user="$MYSQL_USER" --password="$MYSQL_PASSWORD" --databases $db > /var/lib/marzban/mysql/db-backup/$db.sql
