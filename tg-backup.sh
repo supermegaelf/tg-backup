@@ -6,12 +6,12 @@ TG_BOT_TOKEN=""
 TG_CHAT_ID=""
 
 if [ -z "$MYSQL_USER" ] || [ -z "$MYSQL_PASSWORD" ] || [ -z "$TG_BOT_TOKEN" ] || [ -z "$TG_CHAT_ID" ]; then
-    read -p "MySQL username (default is marzban, press Enter to use default): " MYSQL_USER
+    read -p $'\033[32mMySQL username (default is marzban, press Enter to use default): \033[0m' MYSQL_USER
     MYSQL_USER=${MYSQL_USER:-marzban}
-    read -sp "MySQL password: " MYSQL_PASSWORD
+    read -sp $'\033[32mMySQL password: \033[0m' MYSQL_PASSWORD
     echo
-    read -p "Telegram Bot Token: " TG_BOT_TOKEN
-    read -p "Telegram Chat ID: " TG_CHAT_ID
+    read -p $'\033[32mTelegram Bot Token: \033[0m' TG_BOT_TOKEN
+    read -p $'\033[32mTelegram Chat ID: \033[0m' TG_CHAT_ID
 
     if [ -z "$MYSQL_USER" ]; then
         echo "Error: MySQL username cannot be empty"
